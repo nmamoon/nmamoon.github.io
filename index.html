@@ -1,82 +1,373 @@
-<html> 
-<head> 
-	<title>Resume</title>
-	<link rel="stylesheet" type="text/css" href="assets/css/resume.css">
-	<link href="http://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet" type="text/css">
-</head>
-<body>
-	<div> 
-		<div id="navbar"> 
-			<div id="nav-content">
-				<div id="logo"> <img src="assets/img/ProfilePic.png"/></div>
+
+
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style> 
+circle {fill: lightblue; stroke: black;} 
+
+#tooltip {
+    opacity: 0;
+    position: absolute;
+    text-align: left;
+    width: 150px; height: 90px;
+    background: white;
+    border: 0px;
+}
+
+#firstannotation {
+    opacity: 0;
+    position: absolute;
+    text-align: left;
+    width: 150px; height: 90px;
+    background: white;
+    border: 0px;
+}
+
+#secondannotation {
+    opacity: 0;
+    position: absolute;
+    text-align: left;
+    width: 150px; height: 90px;
+    background: white;
+    border: 0px;
+}
+
+
+</style>
+<body onload='init()'>
+
+<svg width=600 height=700>
+<div id="tooltip"></div>
+<div id="firstannotation"></div>
+<div id="secondannotation"></div>
+</svg>
+<script>
+async function init() {
+
+
+/*
+var div = d3.select("svg").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
+*/
+
+var tooltip = d3.select("#tooltip");
+var firstAnnotation = d3.select("#firstannotation");
+var secondAnnotation = d3.select("#secondannotation");
+
+var myData = ['Overview', 'Gasoline', 'Diesel', 'Electric']
+var myColors = ['blue', 'red', 'orange', 'green']
+
+var linearScale = d3.scaleLinear()
+	.domain([0, 4])
+	.range([50, 400])
+
+var ordinalScale = d3.scaleOrdinal()
+	.domain(myData)
+	.range(myColors);
+
+var xScaleArray = [d3.scaleLog().domain([10, 150]).range([0, 500]), 
+	d3.scaleLog().domain([10, 50]).range([0, 500]), 
+	d3.scaleLog().domain([10, 50]).range([0, 500]), 
+	d3.scaleLog().domain([60, 150]).range([0, 500])]
+
+var yScaleArray = [d3.scaleLog().domain([10, 150]).range([500, 0]), 
+	d3.scaleLog().domain([10, 50]).range([500, 0]), 
+	d3.scaleLog().domain([10, 50]).range([500, 0]), 
+	d3.scaleLog().domain([60, 150]).range([500, 0])]
+
+var xAxisArray = [[10, 20, 50, 100], 
+	[15, 10, 20, 50], 
+	[15, 10, 20, 50], 
+	[60, 70, 90, 150]]
+
+var yAxisArray = [[10, 20, 50, 100], 
+	[15, 10, 30, 50], 
+	[15, 10, 30, 50], 
+	[60, 70, 90, 150]]
+
+var opacities = [[0.7, 0.7, 0.7], 
+	[0.8, 0.1, 0.1], 
+	[0.1, 0.8, 0.1], 
+	[0.1, 0.1, 0.8]]
+
+
+
+
+
+var myElement = d3.select("svg")
+		.append("g")
+		.attr("transform", "translate(50,50)")
+
+		d3.csv("https://flunky.github.io/cars2017.csv").then(function(data){
+
+
 			
+			myElement
+			.selectAll("circle")
+			.data(data)
+			.enter()
+			.append("circle")
+			//myCircles.transition()
+		    	//.delay(function(d,i){return(i*8)})
+		    .attr("cx", function (d) { 
+		    	return xScaleArray[0](parseInt(d.AverageCityMPG)); 
+		    } )
+		    .attr("cy", function (d) { 
+		    	return yScaleArray[0](parseInt(d.AverageHighwayMPG)); 
+		    } )
+		    .attr("r", function (d) { 
+		    	return 6 //2 + parseInt(d.EngineCylinders); 
+		    } )
+		    .attr("opacity", function(d) {
+		    	var fuel = d.Fuel;
+		    	console.log("Fuel: " + fuel);
+		    	if (fuel == "Gasoline") {
+		    		return opacities[0][0];
+		    	} else if (fuel == "Diesel") {
+		    		return opacities[0][1];
+		    	} else {
+		    		return opacities[0][2];
+		    	}
+		    })
+		    .style("fill", function(d) {
+		    	var fuel = d.Fuel;
+		    	console.log("Fuel: " + fuel);
+		    	if (fuel == "Gasoline") {
+		    		return myColors[1];
+		    	} else if (fuel == "Diesel") {
+		    		return myColors[2];
+		    	} else {
+		    		return myColors[3];
+		    	}
+		    })
+		    .on("mouseover", function(d,i) {
+		        tooltip.style("opacity", 1)
+		               .style("left",(d3.event.pageX)+"px")
+		               .style("top",(d3.event.pageY)+"px")
+		               .html("" + d.Make + "<br/>" 
+		               	+ d.EngineCylinders + " Cylinders" + "<br/>"
+		               	+ d.AverageCityMPG + " MPG - City" + "<br/>"
+		               	+ d.AverageHighwayMPG+  " MPG - Highway" + "<br/>");
+		    })
+		    
 
-				<div  id="login"> About </div>	
-				<div  id="login"> Projects </div>
-				<div  id="login"> Experiences </div>
+		    d3.select("svg")
+			.append("g")
+			.attr("transform", "translate(50,50)")
+			.call(d3.axisLeft(yScaleArray[0]).tickFormat(d3.format("~s")).tickValues(yAxisArray[0]))
+			.attr('font-size', '10')
 
-			</div>
-		</div>
-		
-	</div>
-	<!-- Content -->
-	<div id="page">
-		<div class="box-title" id="top-movies"> 
-			<b>Projects<b>
-		</div>
-		
-		<div class="film-row2">
-			<div class="film-item2">
-				<div class="gif2 god"></div>
-				<div class="movie-title">
-					<b>Ticktock</b>
-				</div>
-				<div class="movie-title">An app that allows you to comment - anonymously and competitively - on your friends' posts! Eight hours after the posting date, the identity of the top-voted commenter is revealed.
-
-				<p>
-					<a href="https://itunes.apple.com/us/app/ticktock/id1243265564?mt=8">
-					Please check it out!
-					</a>
-				</p>
-
-
-				</div>
-
-			</div>
-			<div class="film-item2">
-				<div class="gif2 simp"></div>
-				<div class="movie-title"><b>Simpl</b></div>
-				<div class="movie-title">An app that allows you to generate quick summaries from web articles. Using the ayylien API, as well as our own clustering algorthms, Simpl extracts and displays the most relevant snippets from the text - with pretty good accuracy!
-
-
-
-				</div>
-				
-			</div>
-		
-			<div class="film-item2">
-				<div class="gif2 land"></div>
-				<div class="movie-title"><b>Marauder's Map</b></div>
-				<div class="movie-title">An app which allows you to "find your friends" on a map, as well as to post specialized statuses at certain locations. Implemented using Swift, as well as a Firebase backend and Mapkit.
-
-
-
-				Created as part of iOS decal!
-
-
-
-				</div>
-				
-			</div>
+			d3.select("svg")
+			.append("g")
+		    .attr("transform", "translate(20,300)")
+		    .append('text')
+		    .attr('text-anchor', 'middle')
+		    .attr('transform', 'rotate(-90)')
+		    .text('Average MPG - Highway')
+		    ;
 			
-		</div>
-		
-		<div class="box-title" id="news"> 
-		</div>
-	</div>
+			d3.select("svg")
+			.append("g")
+			.attr("transform", "translate(50,550)")
+			.call(d3.axisBottom(xScaleArray[0]).tickFormat(d3.format("~s")).tickValues(xAxisArray[0]))
+			.attr('font-size', '10')
 
-</body>
-<script src="https://code.jquery.com/jquery-1.11.0.min.js">
+			d3.select("svg")
+			.append("g")
+			.append("text")
+		    .attr("class", "x label")
+		    .attr("text-anchor", "middle")
+		    .attr("x", 300)
+		    .attr("y", 580)
+		    .text('Average MPG - City');
+
+		    firstAnnotation.style("opacity", 1)
+		               .style("left",100+"px")
+		               .style("top",100+"px")
+		               .html(" Here, different car models are arranged according to average city and highway MPG. Three distinct clusters can be observed based on fuel type. ");
+
+})
+
+
+
+
+
+
+
+
+d3.select('svg')
+	.selectAll('text')
+	.data(myData)
+	.enter()
+	.append('text')
+	.attr('y', 25)
+	.attr('x', function(d, i) {
+		return linearScale(i);
+	})
+	.attr("height", 50)
+	.attr("width", 100)
+	.text(function(d) {
+		return d;
+	})
+	.attr("opacity", 0.7)
+	.style('fill', function(d) {
+		return ordinalScale(d);
+	})
+	.on("click", function(d, i){
+		console.log("Button clicked:")
+		console.log(i);
+
+		index = i;
+		d3.select("svg").selectAll('g').remove()
+
+		var myElement = d3.select("svg")
+		.append("g")
+		.attr("transform", "translate(50,50)")
+
+		d3.csv("https://flunky.github.io/cars2017.csv").then(function(data){
+
+			myElement
+			.selectAll("circle")
+			.data(data)
+			.enter()
+			.append("circle")
+			//.transition()
+		    //.delay(function(d,i){return(i*8)})
+		    .attr("cx", function (d) { 
+		    	return xScaleArray[index](parseInt(d.AverageCityMPG)); 
+		    } )
+		    .attr("cy", function (d) { 
+		    	return yScaleArray[index](parseInt(d.AverageHighwayMPG)); 
+		    } )
+		    .attr("r", function (d) { 
+		    	return 6 // + parseInt(d.EngineCylinders); 
+		    } )
+		    .attr("opacity", function(d) {
+		    	var fuel = d.Fuel;
+		    	console.log("Fuel: " + fuel);
+		    	if (fuel == "Gasoline") {
+		    		return opacities[index][0];
+		    	} else if (fuel == "Diesel") {
+		    		return opacities[index][1];
+		    	} else {
+		    		return opacities[index][2];
+		    	}
+		    })
+		    .style("fill", function(d) {
+		    	var fuel = d.Fuel;
+		    	console.log("Fuel: " + fuel);
+		    	if (fuel == "Gasoline") {
+		    		return myColors[1];
+		    	} else if (fuel == "Diesel") {
+		    		return myColors[2];
+		    	} else {
+		    		return myColors[3];
+		    	}
+		    })
+		    .on("mouseover", function(d,i) {
+		        tooltip.style("opacity", 1)
+		               .style("left",(d3.event.pageX)+"px")
+		               .style("top",(d3.event.pageY)+"px")
+		               .html("" + d.Make + "<br/>" 
+		               	+ d.EngineCylinders + " Cylinders" + "<br/>"
+		               	+ d.AverageCityMPG + " MPG - City" + "<br/>"
+		               	+ d.AverageHighwayMPG+  " MPG - Highway" + "<br/>");
+		    })
+
+		    d3.select("svg")
+			.append("g")
+			.attr("transform", "translate(50,50)")
+			.call(d3.axisLeft(yScaleArray[index]).tickFormat(d3.format("~s")).tickValues(yAxisArray[index]))
+			.attr('font-size', '10')
+
+			d3.select("svg")
+			.append("g")
+		    .attr("transform", "translate(20,300)")
+		    .append('text')
+		    .attr('text-anchor', 'middle')
+		    .attr('transform', 'rotate(-90)')
+		    .text('Average MPG - Highway')
+		    ;
+			
+			d3.select("svg")
+			.append("g")
+			.attr("transform", "translate(50,550)")
+			.call(d3.axisBottom(xScaleArray[index]).tickFormat(d3.format("~s")).tickValues(xAxisArray[index]))
+			.attr('font-size', '10')
+
+			d3.select("svg")
+			.append("g")
+			.append("text")
+		    .attr("class", "x label")
+		    .attr("text-anchor", "middle")
+		    .attr("x", 300)
+		    .attr("y", 580)
+		    .text('Average MPG - City');
+
+		    
+
+		    if (index == 0) {
+
+		    	firstAnnotation.style("opacity", 1)
+		               .style("left",100+"px")
+		               .style("top",100+"px")
+		               .html(" Here, different car models are arranged according to average city and highway MPG. Three distinct clusters can be observed based on fuel type. ");
+
+		               
+
+		    } else if (index == 1) {
+
+		    	firstAnnotation.style("opacity", 1)
+		               .style("left",100+"px")
+		               .style("top",100+"px")
+		               .html(" Gasoline-powered cars form a large cluster with generally lower city and highway MPGs as compared to diesel-powered and electric cars.");
+
+		        secondAnnotation.style("opacity", 1)
+		               .style("left",250+"px")
+		               .style("top",350+"px")
+		               .html(" These cars range between 10 and 39 MPG (city), and 16 and 42 MPG (highway). ");
+
+		    } else if (index == 2) {
+
+		    	firstAnnotation.style("opacity", 1)
+		               .style("left",100+"px")
+		               .style("top",100+"px")
+		               .html(" Diesel-powered cars form a smaller cluster with generally lower city and highway MPGs as compared to electric cars, as well as most gasoline-powered cars.");
+
+		               secondAnnotation.style("opacity", 1)
+		               .style("left",350+"px")
+		               .style("top",275+"px")
+		               .html(" These cars range between 21 and 30 MPG (city), and 28 and 40 MPG (highway). ");
+
+		    } else {
+
+		    	firstAnnotation.style("opacity", 1)
+		               .style("left",100+"px")
+		               .style("top",100+"px")
+		               .html(" Electric cars form a cluster with higher city and highway MPGs than either gasoline-powered cars or diesel-powered cars.");
+
+		        secondAnnotation.style("opacity", 1)
+		               .style("left",400+"px")
+		               .style("top",350+"px")
+		               .html(" These cars range between 85 and 150 MPG (city), and 82 and 122 MPG (highway). ");
+
+		    }
+		    
+
+
+	})
+
+
+	
+
+
+
+})
+
+
+}
 </script>
-<script src="...assets/js/script.js"> </script> 
+</body>
 </html>
